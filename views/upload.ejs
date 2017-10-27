@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+    <input type="file" id='myfile'/><input  type="button" value='上传文件' onclick="submit()"/>
+</body>
+<script>
+  function submit (){
+    var url='http://localhost:3000/users/uploadfile'
+    var formData = new FormData()
+    var file = document.getElementById('myfile').files[0]
+    console.log(file)
+    formData.append('upload', file);
+    fetch(url,{ 
+      method:'post',
+      body:formData
+    }).then(res=>{
+      return res.json()
+    }).then(res=>{
+      console.log(res)
+    })
+  }
+</script>
+</html>

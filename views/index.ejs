@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <h1>
+    <%= title %>
+  </h1>
+  <p>EJS Welcome to
+    <%= title %>
+  </p>
+  <div class="login_box">
+    用户名：<input type="text" id='uname' /><br /> 
+    密 码：<input type="password" id='pass' /><br />
+    <input type="submit" value="注册" onclick="submit()"/>
+    <a href="/github/login">
+     github
+</a>
+  </div>
+</body>
+<script>
+  function submit (){
+    var xmlhttp;
+    var uname = document.getElementById('uname').value
+    var password = document.getElementById('pass').value
+    var parms = `uname=${uname}&password=${password}`
+    if(window.XMLHttpRequest){
+      xmlhttp = new XMLHttpRequest();
+    } else {
+      xmlhttp = new ActiveXObject();
+    }
+    xmlhttp.onreadystatechange = function (){
+      if(xmlhttp.readyState==4&& xmlhttp.status == 200){
+        alert('yes')
+      }
+    }
+    xmlhttp.open('POST','/reguser')
+    xmlhttp.send(parms)
+  }
+</script>
+
+</html>
