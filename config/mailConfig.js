@@ -10,7 +10,7 @@ module.exports = {
      * @param {string} content 发送的内容
      * @param {string} result 发送结果
      */
-    async mailSend(ctx, toEmail, title, content, result) {
+    async mailSend(ctx, toEmail, title, content) {
         var transorter = mail.createTransport({
             service: 'qq',
             secureConnection: true,

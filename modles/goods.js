@@ -8,7 +8,6 @@ var goods = sequelize.define('goods', {
     id: {
         type: Sequelize.INTEGER(10),
         primaryKey: true,
-        allowNull: false
     },
     name: { type: Sequelize.CHAR(25) },
     price: { type: Sequelize.INTEGER(10) },

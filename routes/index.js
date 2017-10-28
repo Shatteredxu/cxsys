@@ -14,10 +14,12 @@ router.get('/github/login', async (ctx) => {
   ctx.redirect(path)
 }).get('/github/oauth/callback', user.githubLogin)
 
-// 获取用户信息
-router.post('/getUserInfo',user.getUserInfo)
 // 分页获取项目
 router.post('/getProject',index.getProject)
 // 分页获取实验室
 router.post('/getLab',index.getLab)
+//邮箱zhuce
+router.post('/mailRegister', user.mailRegister)
+//邮箱验证
+router.post('/mailSure', user.mailSure)
 module.exports = router

@@ -13,14 +13,16 @@ module.exports = {
         // console.log("token ：" + token)
         return token
     },
-    encryptToken(token) {
-        jwt.verify(token, secretOrPrivateKey, function (err, decode) {
+    async encryptToken(token) {
+        console.log("token",token)
+        await jwt.verify(token, secretOrPrivateKey,await function (err, decode) {
             if (err) {  //  时间失效的时候/ 伪造的token          
-                rs.json({ err: err })
+                return 0
+                console.log("0")  
             } else {
                 rq.decode = decode;
-                console.log(decode.uid);   
-                next();
+                return decode.uid; 
+                console.log("decode"+decode)  
             }
         })
     }

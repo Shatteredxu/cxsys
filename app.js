@@ -17,10 +17,13 @@ app.use(koaBody({ multipart: true }));
 
 //跨域支持
 app.use(cors({ credentials: true }));
-
 // 设置session
 app.use(session({
-  //store: new Store(),
+  secret: 'cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false },
+  // store: new Store(),
   //cookie的保存期为一天
   maxAge: 1000 * 60 * 60 * 24,
 }));

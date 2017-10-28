@@ -11,7 +11,7 @@ var lab = sequelize.define('lab', {
         allowNull: false,
         autoIncrement:true
     },
-    chargeUser:{type:Sequelize.INTEGER(10)},
+    // chargeUser:{type:Sequelize.INTEGER(10)},
     name: { type: Sequelize.CHAR(20) },
     position: { type: Sequelize.CHAR(30) },
     establishTime: { type: Sequelize.DATE() },

@@ -7,12 +7,19 @@ var path = require('path')
 var fs = require('fs')
 const uuidV1 = require('uuid/v1')
 var mail = require('../config/mailConfig')
+var token1 = require('../config/jsonWebToken')
+var crypto = require('../config/cryptoConfig')
+var common = require('../common/common')
+/**
+ * 需要登陆的请求
+ * 1.github第三方登录
+ * 2.获取用户信息
+ * 3.修改用户信息
+ * 4.修改头像
+ * 5.邮箱验证码的发送
+ * 6.修改密码
+ */
 module.exports = {
-    //注册用户
-    async register(ctx) {
-
-    },
-
     /**
      * github第三方登录
      */
@@ -58,14 +65,16 @@ module.exports = {
      * 获取用户信息
      */
     async getUserInfo(ctx) {
-        if (ctx.request.body) {
-            console.log(ctx.request.body)
+        if (ctx.request.body == {}) {
+            console.log("sdsdw", ctx.request.body)
             var id = ctx.request.body.id
         } else {
-            var id = ctx.session.user.id
-            ctx.body = result(-2, '未登录')
+            // let webToken = ctx.request.header.authorization
+            // console.log("sdsd",ctx.request.header.authorization)
+            // var token = token1.encryptToken(webToken)
+            var id = ctx.session.id
         }
-        await User.findOne({
+        await user.findOne({
             where: { 'id': id },
             'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid']
         }).then(res => {
@@ -89,7 +98,6 @@ module.exports = {
         const filePaths = [];
         var res;
         const files = ctx.request.body.files || {};
-
         for (let key in files) {
             const file = files[key];
             let fileName = file.name
@@ -97,7 +105,7 @@ module.exports = {
             let fileString = array[1]
             var homeDir = path.resolve(__dirname, '..')
             var newpath = `${homeDir}/public/${uuidV1()}.${fileString}`;
-            if (newpath.endsWith('.png')) {
+            if (newpath.endsWith('.png') || newpath.endsWith('.gif') || newpath.endsWith('.jpg')) {
                 const reader = fs.createReadStream(file.path);
                 const writer = fs.createWriteStream(newpath);
                 reader.pipe(writer);
@@ -130,31 +138,24 @@ module.exports = {
     * @param {object} next 
     */
     async mailRegister(ctx, next) {
-        var chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-        var randomNum = ''
-        for (var i = 0; i < 6; i++) {
-            let str = chars[Math.floor(Math.random() * 36)]
-            randomNum += str
-        }
-        let identifyCode = randomNum
+        let identifyCode = common.getIdentifyCode()
         let tomail = ctx.request.body.email
         let title = '邮箱注册'
         let content = `<h3>您的验证码为${identifyCode}</h3>`
-        let result = '邮件已经发送'
-        let message = await mail.mailSend(ctx, tomail, title, content, result)
+        let message = await mail.mailSend(ctx, tomail, title, content)
         ctx.session.identifyCode = identifyCode
-        if(message){
+        if (message) {
             ctx.body = result(1, '发送成功')
-        }else {
-            ctx.body = result(0,'服务器错误')
+        } else {
+            ctx.body = result(0, '服务器错误')
         }
-       
     },
     /**
      * 邮箱验证码的验证
      */
     async mailSure(ctx) {
         let identifyCode = ctx.request.body.identifyCode
+        console.log(ctx.session.identifyCode)
         if (identifyCode == ctx.session.identifyCode) {
             ctx.body = result(1, '验证成功')
         } else if (identifyCode !== ctx.session.identifyCode) {
@@ -162,5 +163,51 @@ module.exports = {
         } else {
             ctx.body = result(0, '服务器错误')
         }
-    }
+    },
+    /**
+     * 修改密码
+     * @param {*} ctx 
+     */
+    async alterPasswd(ctx) {
+        let s = ctx.request.body
+        let oldPass = s.oldPass
+        let newPass = s.newPass
+        let uid = ctx.session.id
+        if (uid) {
+            let oldMd5 = crypto.getMd5(oldPass)
+            var res = await user.findOne({ where: { id: uid } })
+            if (res.password == oldMd5) {
+                let newMd5 = crypto.getMd5(newPass)
+                await user.update({ password: newMd5 }, {
+                    where: { id: uid }
+                }).then(res=>{
+                    ctx.body = result(1,'修改成功')
+                }).catch(Error =>{
+                    ctx.body = result(0,'服务器错误')
+                })
+            }else {
+                console.log
+                ctx.body = result(-1,'原密码错误')
+            }
+        } else {
+            ctx.body = result(-2, '未登录')
+        }
+    },
+    /**
+     * 邮箱找回密码
+     * @param {*} ctx 
+     */
+    async getBackPass(ctx){
+        let tomail = ctx.request.body.email
+        let identifyCode = common.getIdentifyCode()
+        let title = '找回密码'
+        let content = `<h3>您的验证码为${identifyCode}</h3>`
+        let message = await mail.mailSend(ctx, tomail, title, content)
+        ctx.session.identifyCode = identifyCode
+        if (message) {
+            ctx.body = result(1, '发送成功')
+        } else {
+            ctx.body = result(0, '服务器错误')
+        }
+    },
 }

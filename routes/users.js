@@ -8,10 +8,11 @@ router.prefix('/user')
 // 上传文件
 router.post('/uploadHeadImg', user.uploadHeadImg)
 
-//邮箱修改密码
-router.post('/mailRegister', user.mailRegister)
 
-//邮箱验证
-router.post('/mailSure', user.mailSure)
-
+// 获取用户信息
+router.post('/getUserInfo',user.getUserInfo)
+// 修改密码
+router.post('/alterPasswd',user.alterPasswd)
+//找回密码
+router.post('/getBackPass',user.getBackPass)
 module.exports = router

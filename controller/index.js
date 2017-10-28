@@ -6,20 +6,29 @@ var lab = require('../modles/lab')
 var crypto = require('../config/cryptoConfig')
 var token1 = require('../config/jsonWebToken')
 var common = require('../common/common')
+/**
+ * 获取项目列表（分页）
+ * 分页获取实验室
+ * 登陆用户
+ * 获取项目列表（分页）
+ * 
+ */
 module.exports = {
 
     /**
-     *  获取项目列表（分页）
+     *  
+     * 注册用户
      * @param {object} ctx 请求 
      */
     async getProject(ctx) {
+        let s1 = ctx.request.header
         let s = ctx.request.body
         let pageCount = parseInt(s.pageCount)
         let currentPage = parseInt(s.currentPage)
-        console.log(pageCount, currectPage)
+        console.log(pageCount, currentPage)
         project.belongsTo(user, { foreignKey: 'chargeUser' })
         project.belongsTo(lab, { foreignKey: 'labId' })
-        await project.findAll({
+        await project.findAndCountAll({
             'limit': pageCount,
             'offset': pageCount * (currentPage - 1),
             include: [{ model: user, attributes: ['id', 'sid', 'name', 'headImg', 'email', 'pid', 'power'] },
@@ -39,12 +48,12 @@ module.exports = {
         let pageCount = parseInt(s.pageCount)
         let currentPage = parseInt(s.currentPage)
         lab.belongsTo(user, { foreignKey: 'chargeUser' })
-        await lab.findAll({
+        await lab.findAndCountAll({
             'limit': pageCount,
             'offset': pageCount * (currentPage - 1),
-            include: { model: user, attributes: ['id', 'sid', 'name', 'headImg', 'email', 'pid', 'power'] }
+            include: { model:user, attributes: ['id', 'sid', 'name', 'headImg', 'email', 'pid', 'power'] }
         }).then(res => {
-            ctx.body = result(1, res)
+            ctx.body = result(1, res)  
         })
     },
     // 登陆用户
@@ -60,7 +69,7 @@ module.exports = {
                 } else if (res.password == md5pass) {
                    var token  = await common.saveToken(res.id)
                     ctx.body = result(1, token)
-                    ctx.session.user = res.id
+                    ctx.session.id = res.id
                 } else if (res.password !== md5pass) {
                     ctx.body = result(-2, '密码错误')
                 } else {
