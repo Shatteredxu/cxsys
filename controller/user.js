@@ -76,7 +76,7 @@ module.exports = {
         }
         await user.findOne({
             where: { 'id': id },
-            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid']
+            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid','introduce']
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(Error => {
@@ -111,7 +111,7 @@ module.exports = {
                 reader.pipe(writer);
                 let arraypath = newpath.split('/')
                 let UUidName = arraypath[arraypath.length - 1]
-                let databasePath = `/public/images/${UUidName}`
+                let databasePath = `/${UUidName}`
                 let uid = ctx.session.id
                 if (uid) {
                     await user.update({
@@ -122,7 +122,7 @@ module.exports = {
                         }).then((res) => {
                             ctx.body = result(1, "")
                         }).catch(Error => {
-                            ctx.body = result(0, "")
+                            ctx.body = result(0, Error)
                         })
                 } else {
                     ctx.body = result('-1', "未登录")
@@ -132,7 +132,7 @@ module.exports = {
             }
         }
     },
-    /**
+    /**  
     * 邮箱验证码的发送
     * @param {object} ctx 
     * @param {object} next 
@@ -210,4 +210,63 @@ module.exports = {
             ctx.body = result(0, '服务器错误')
         }
     },
+    // 查询用户名是否存在
+    async queryUname(ctx){
+        let s = ctx.request.body
+        let uname = s.uname
+        await user.findOne({
+            where:{name:uname},
+            attributes:['id']
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    },
+    // 查询用户名是否存在
+    async queryEmail(ctx){
+        let s = ctx.request.body
+        let email = s.email
+        await user.findOne({
+            where:{email:email},
+            attributes:['id']
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    },
+    async modUserInfo(ctx){
+        let s = ctx.request.body
+        let uname = s.uname
+        let sid = s.sid
+        let phone = s.phone
+        let sex = s.sex
+        let email = s.email
+        let introduce = s.introduce
+        let id =ctx.session.id
+        await user.update({
+            name:uname,
+            sid:sid,
+            phone:phone,
+            sex:sex,
+            email:email,
+            introduce:introduce
+        },{
+            where:{id:id}
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    },
+    //退出登陆
+    async exitLogin(ctx){
+       ctx.session.id=null
+       if(ctx.session.id){
+        ctx.body =  result(1,'成功')
+       }else{
+        ctx.body =  result(0,'失败')
+       }
+    }
 }

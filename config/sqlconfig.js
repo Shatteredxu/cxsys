@@ -7,7 +7,7 @@ var Sequelize=require('Sequelize')
  * @return {sequelize}返回一个sequelize对象
  */
 var sequelize = new Sequelize('xwj','root','root',{
-    host:'119.29.150.141',
+    host:'localhost',
     dialect:'mysql',
     port:3306,
 })

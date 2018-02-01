@@ -7,7 +7,7 @@ var sequelize = require('../config/sqlconfig')
 var notice = sequelize.define('notice', {
     id: { type: Sequelize.INTEGER(10), primaryKey: true,autoIncrement:true },
     issueId: { type: Sequelize.INTEGER(10) },
-    time: { type: Sequelize.timestamps(6) ,defaultValue:Sequelize.NOW()},
+    time: { type: Sequelize.DATE()  ,defaultValue:Sequelize.NOW()},
     title: { type: Sequelize.CHAR(30) },
     content: { type: Sequelize.CHAR(255) },
     sendType: { type: Sequelize.INTEGER(1),defaultValue:0 },

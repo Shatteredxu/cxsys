@@ -21,8 +21,9 @@ module.exports.initialize = function (app) {
             console.log(ctx.session.id)
         } else {
             // ctx.redirect('/login');// 未登录则跳转到登陆界面
-            ctx.session.id = 3
+            ctx.session.id = 5
             ctx.request.header.authorization = "fTzoHpIVSdCxKxxC2mMYkVW7v6hL9Ah6kkayMuM"
+            console.log("ctx.session.id")
             return next();
         }
     });
@@ -40,9 +41,9 @@ module.exports.initialize = function (app) {
                 ctx.body = result(-5, '权限不足')
             }
         })
-    });
+    }); 
     app.use(labUser.routes(), labUser.allowedMethods())
-    
+       
     //实验室老师权限
     app.use(async (ctx, next) => {
         let uid = ctx.session.id

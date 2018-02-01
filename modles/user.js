@@ -8,14 +8,15 @@ var user = sequelize.define('user', {
     sid: { type: Sequelize.INTEGER(10),defaultValue:0 },
     name: { type: Sequelize.CHAR(10) },
     password: { type: Sequelize.CHAR(30) },
-    headImg: { type: Sequelize.CHAR(50),defaultValue:'/images/header.jpg' },
-    email:{type: Sequelize.CHAR(15)},
+    headImg: { type: Sequelize.CHAR(100),defaultValue:'/images/header.jpg' },
+    email:{type: Sequelize.CHAR(30)},
     pid:{type: Sequelize.INTEGER(10)},
     phone:{type: Sequelize.CHAR(11),defaultValue:'无'},
     sex:{type: Sequelize.INTEGER(1),defaultValue:0},
     power:{type: Sequelize.INTEGER(1),defaultValue:0},
     token:{type:Sequelize.CHAR(255)},
-    own_lab:{type:Sequelize.CHAR(10)}
+    own_lab:{type:Sequelize.CHAR(10)},
+    introduce:{type:Sequelize.CHAR(255),defaultValue:'这个人很懒，他什么也没有说'}
 },
     {
         tableName: 'db_user',
