@@ -10,6 +10,8 @@ var mail = require('../config/mailConfig')
 var token1 = require('../config/jsonWebToken')
 var crypto = require('../config/cryptoConfig')
 var common = require('../common/common')
+var project_apply = require('../modles/projectApply')
+var sequelize = require('sequelize')
 /**
  * 需要登陆的请求
  * 1.github第三方登录
@@ -76,7 +78,7 @@ module.exports = {
         }
         await user.findOne({
             where: { 'id': id },
-            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid','introduce']
+            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid', 'introduce']
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(Error => {
@@ -180,14 +182,14 @@ module.exports = {
                 let newMd5 = crypto.getMd5(newPass)
                 await user.update({ password: newMd5 }, {
                     where: { id: uid }
-                }).then(res=>{
-                    ctx.body = result(1,'修改成功')
-                }).catch(Error =>{
-                    ctx.body = result(0,'服务器错误')
+                }).then(res => {
+                    ctx.body = result(1, '修改成功')
+                }).catch(Error => {
+                    ctx.body = result(0, '服务器错误')
                 })
-            }else {
+            } else {
                 console.log
-                ctx.body = result(-1,'原密码错误')
+                ctx.body = result(-1, '原密码错误')
             }
         } else {
             ctx.body = result(-2, '未登录')
@@ -197,7 +199,7 @@ module.exports = {
      * 邮箱找回密码
      * @param {*} ctx 
      */
-    async getBackPass(ctx){
+    async getBackPass(ctx) {
         let tomail = ctx.request.body.email
         let identifyCode = common.getIdentifyCode()
         let title = '找回密码'
@@ -211,32 +213,47 @@ module.exports = {
         }
     },
     // 查询用户名是否存在
-    async queryUname(ctx){
+    async queryUname(ctx) {
         let s = ctx.request.body
         let uname = s.uname
-        await user.findOne({
-            where:{name:uname},
-            attributes:['id']
-        }).then(res=>{
-            ctx.body = result(1,res)
-        }).catch(err=>{
-            ctx.body = result(0,err)
-        })
+        let id=s.id
+        if(uname){
+            await user.findOne({
+                where: { name: uname},
+                attributes: ['id','name']
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
+            })
+        }else if(id){
+            await user.findOne({
+                where: { id: id},
+                attributes: ['id','name']
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
+            })
+        }else{
+            ctx.body = result(-5,'参数错误')
+        }
+        
     },
     // 查询用户名是否存在
-    async queryEmail(ctx){
+    async queryEmail(ctx) {
         let s = ctx.request.body
         let email = s.email
         await user.findOne({
-            where:{email:email},
-            attributes:['id']
-        }).then(res=>{
-            ctx.body = result(1,res)
-        }).catch(err=>{
-            ctx.body = result(0,err)
+            where: { email: email },
+            attributes: ['id']
+        }).then(res => {
+            ctx.body = result(1, res)
+        }).catch(err => {
+            ctx.body = result(0, err)
         })
     },
-    async modUserInfo(ctx){
+    async modUserInfo(ctx) {
         let s = ctx.request.body
         let uname = s.uname
         let sid = s.sid
@@ -244,29 +261,88 @@ module.exports = {
         let sex = s.sex
         let email = s.email
         let introduce = s.introduce
-        let id =ctx.session.id
+        let id = ctx.session.id
         await user.update({
-            name:uname,
-            sid:sid,
-            phone:phone,
-            sex:sex,
-            email:email,
-            introduce:introduce
-        },{
-            where:{id:id}
-        }).then(res=>{
-            ctx.body = result(1,res)
-        }).catch(err=>{
-            ctx.body = result(0,err)
-        })
+            name: uname,
+            sid: sid,
+            phone: phone,
+            sex: sex,
+            email: email,
+            introduce: introduce
+        }, {
+                where: { id: id }
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
+            })
     },
     //退出登陆
-    async exitLogin(ctx){
-       ctx.session.id=null
-       if(ctx.session.id){
-        ctx.body =  result(1,'成功')
-       }else{
-        ctx.body =  result(0,'失败')
-       }
-    }
+    async exitLogin(ctx) {
+        ctx.session.id = null
+        if (ctx.session.id) {
+            ctx.body = result(1, '成功')
+        } else {
+            ctx.body = result(0, '失败')
+        }
+    },
+    /**
+     * 申请实验室项目接口
+     * 事务=提交申请+老师申请消息
+     */
+    async applyProject(ctx) {
+        let s = ctx.request.body
+        let pname = s.pname
+        let applyLab = s.applyLab
+        let devDemand = s.devDemand
+        await project_apply.create({
+            pname: pname,
+            applyLab: applyLab,
+            devDemand: devDemand
+        }).then(res => {
+            ctx.body = result(1, res)
+        }).catch(Error => {
+            ctx.body = result(0, Error)
+        })
+    },
+    /**
+     * 上传项目计划方案
+     * @param {*} ctx 
+     */
+    async applyProPlan(ctx) {
+        const filePaths = [];
+        var res;
+        const files = ctx.request.body.files || {};
+        const pid = ctx.request.body.fields.pid
+        console.log(labId)
+        for (let key in files) {
+            const file = files[key];
+            let fileName = file.name
+            let array = fileName.split('.')
+            let fileString = array[1]
+            var homeDir = path.resolve(__dirname, '..')
+            var newpath = `${homeDir}/public/word/${uuidV1()}.${fileString}`;
+            const reader = fs.createReadStream(file.path);
+            const writer = fs.createWriteStream(newpath);
+            reader.pipe(writer);
+            let arraypath = newpath.split('/')
+            let UUidName = arraypath[arraypath.length - 1]
+            let databasePath = `/word/${UUidName}`
+            if (pid) {
+                await project_apply.update({
+                    scheme: databasePath
+                },
+                    {
+                        where: { id: pid }
+                    }).then((res) => {
+                        ctx.body = result(1, "")
+                    }).catch(Error => {
+                        ctx.body = result(0, Error)
+                    })
+            } else {
+                ctx.body = result(-5, '参数错误')
+            }
+        }
+    },
+
 }

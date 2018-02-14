@@ -28,7 +28,6 @@ module.exports.initialize = function (app) {
         }
     });
     app.use(users.routes(), users.allowedMethods())
-
     // 实验室用户请求
     app.use(async (ctx, next) => {
         let uid = ctx.session.id
@@ -50,8 +49,9 @@ module.exports.initialize = function (app) {
         await user.findOne({
             where: { id: uid }
         }).then(res => {
-            if (res.power !== 2) {
+            if (res.power !== 1) {
                 return next()
+                console.log("sdskkkkk")
             } else {
                 ctx.body = result(-5, '权限不足')
             }
@@ -64,7 +64,7 @@ module.exports.initialize = function (app) {
         await user.findOne({
             where: { id: uid }
         }).then(res => {
-            if (res.power !== 3) {
+            if (res.power !== 2) {
                 return next()
             } else {
                 ctx.body = result(-5, '权限不足')

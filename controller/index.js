@@ -9,6 +9,7 @@ var notice = require('../modles/notice')
 var crypto = require('../config/cryptoConfig')
 var token1 = require('../config/jsonWebToken')
 var common = require('../common/common')
+var lab_glory = require("../modles/lab_glory")
 /**
  * 获取项目列表（分页）
  * 分页获取实验室
@@ -28,7 +29,6 @@ module.exports = {
         let s = ctx.request.body
         let pageCount = parseInt(s.pageCount)
         let currentPage = parseInt(s.currentPage)
-        console.log(pageCount, currentPage)
         project.belongsTo(user, { foreignKey: 'chargeUser' })
         project.belongsTo(lab, { foreignKey: 'labId' })
         await project.findAndCountAll({
@@ -133,6 +133,10 @@ module.exports = {
             ctx.body = result(0, error)
         })
     },
+    /**
+     * 查询头像
+     * @param {*} ctx 
+     */
     async QueryIMG(ctx) {
         let param = ctx.request.body.param
         await user.findOne(
@@ -151,30 +155,107 @@ module.exports = {
         let s = ctx.request.body
         let pageCount = parseInt(s.pageCount)
         let currentPage = parseInt(s.currentPage)
-        lab.belongsTo(user, { foreignKey: 'chargeUser' })
-        await user.findAll({
+        user.belongsTo(lab, { foreignKey: 'own_lab' })
+        await user.findAndCountAll({
             'limit': pageCount,
             'offset': pageCount * (currentPage - 1),
             where: { power: 2 },
-            attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce']
+            attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce','rank'],
+            include: { model: lab }
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(err => {
             ctx.body = result(0, err)
         })
     },
+    //查询公告
     async queryNotice(ctx){
         let len = ctx.request.body.len
-        await notice.findAll({
-            'order': [
-                ['id', 'DESC'],
-            ],
-            limit: len
+        if(len){
+            await notice.findAll({
+                'order': [
+                    ['id', 'DESC'],
+                ],
+                limit: len
+            }).then(res=>{
+                ctx.body = result(1,res)
+            }).catch(err=>{
+                ctx.body = result(0,err)
+            })
+        }else{
+            await notice.findAll({
+                'order': [
+                    ['id', 'DESC'],
+                ],
+            }).then(res=>{
+                ctx.body = result(1,res)
+            }).catch(err=>{
+                ctx.body = result(0,err)
+            })
+        }
+    },
+    /**
+     * 根据实验室获取老师
+     * @param {*} ctx 
+     */
+    async getTeacherBylabId(ctx){
+        let s = ctx.request.body
+        let pageCount = parseInt(s.pageCount)
+        let currentPage = parseInt(s.currentPage)
+        let labId = s.labId
+        lab.belongsTo(user, { foreignKey: 'chargeUser' })
+        await user.findAndCountAll({
+            'limit': pageCount,
+            'offset': pageCount * (currentPage - 1),
+            where: { power: 2,own_lab:labId },
+            attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce']
         }).then(res=>{
             ctx.body = result(1,res)
-        }).catch(err=>{
-            ctx.body = result(0,err)
+        }).catch(error=>{
+            ctx.body = result(0,error)
         })
     },
-    
+    //获取实验室荣誉
+    async queryGlory(ctx){
+        let s = ctx.request.body
+        let labId = s.labId
+        lab_glory.belongsTo(lab, { foreignKey: 'ownLab' })
+        if(labId){
+            await lab_glory.findAndCountAll({
+                attributes: ["id","winTime","ownPro"],
+                where:{ownLab:labId},
+                include: { model: lab }
+            }).then(res=>{
+                ctx.body = result(1,res)
+            })
+        }else{
+            await lab_glory.findAndCountAll({
+                attributes: ["id","winTime","ownPro"],
+                include: { model: lab }
+            }).then(res=>{
+                ctx.body = result(1,res)
+            }).catch(err=>{
+                ctx.body = result(0,err)
+            })
+        }
+    },
+    //获取实验室信息
+    async getLabById(ctx){
+        let labId = ctx.request.body.labId
+        if(labId){
+            var count= await user.count({
+                where: { power: 2,own_lab:labId },
+            })
+            await lab.findOne({
+                where:{id:labId}
+            }).then((res)=>{
+                ctx.body=result(count,res)
+            })
+        }else{
+            ctx.body = result(-1,'参数错误')
+        }
+    },
+    /**
+     * 根据id查询用户
+     */
 }

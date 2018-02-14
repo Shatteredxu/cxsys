@@ -7,10 +7,9 @@ var record = sequelize.define('record', {
     id: { type: Sequelize.INTEGER(10), primaryKey: true ,autoIncrement:true},
     uid: { type: Sequelize.INTEGER(10) },
     record: { type: Sequelize.INTEGER(1) },
-    time: { type: Sequelize.timestamps(10), defaultValue: Sequelize.NOW() },
+    time: { type: Sequelize.DATE(), defaultValue: Sequelize.NOW() },
     content: { type: Sequelize.CHAR(255) },
     labId:{type: Sequelize.INTEGER(10)},
-    pid:{type: Sequelize.INTEGER(10)},
 },
     {
         tableName: 'db_record',

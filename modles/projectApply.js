@@ -5,7 +5,7 @@ var sequelize = require('../config/sqlconfig')
  */
 var projectApply = sequelize.define('projectApply', {
     id: { type: Sequelize.INTEGER(10), primaryKey: true },
-    pid: { type: Sequelize.INTEGER(10) },
+    pname: { type: Sequelize.INTEGER(10) },
     applyTime: { type: Sequelize.INTEGER(1),defaultValue: Sequelize.NOW() },
     applyLab: { type: Sequelize.INTEGER(10) },
     scheme: { type: Sequelize.CHAR(50) },

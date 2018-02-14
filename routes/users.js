@@ -1,7 +1,12 @@
 'use strict';
 const router = require('koa-router')()
 var user = require('../controller/user')
-// 规定每个接口前缀为users
+var lab = require('../controller/lab')
+var index = require('../controller/index')
+/**
+ * 普通用户的接口
+ */
+// 规定每个接口前缀为user
 router.prefix('/user')
   //上传文件接口
 
@@ -9,7 +14,7 @@ router.prefix('/user')
 router.post('/uploadHeadImg', user.uploadHeadImg)
 // 获取用户信息
 router.post('/getUserInfo',user.getUserInfo)
-// 获取用户信息
+// 修改用户信息
 router.post('/modUserInfo',user.modUserInfo)
 // 查询昵称是否存在
 router.post('/queryUname',user.queryUname)
@@ -21,4 +26,10 @@ router.post('/alterPasswd',user.alterPasswd)
 router.post('/getBackPass',user.getBackPass)
 //退出登录
 router.post('/exitLogin',user.exitLogin)
+//获取实验室荣誉
+router.post('/queryGlory',index.queryGlory)
+//申请项目接口
+router.post('/applyProject',user.applyProject)
+//申请项目接口
+router.post('/applyProPlan',user.applyProPlan)
 module.exports = router

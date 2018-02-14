@@ -51,7 +51,7 @@ app.use(async (ctx, next) => {
 })
 routes.initialize(app)
 
-var server = app.listen(3000,()=>{
+var server = app.listen(3001,()=>{
   console.log('3000 start')
 })
 

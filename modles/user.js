@@ -14,7 +14,7 @@ var user = sequelize.define('user', {
     phone:{type: Sequelize.CHAR(11),defaultValue:'无'},
     sex:{type: Sequelize.INTEGER(1),defaultValue:0},
     power:{type: Sequelize.INTEGER(1),defaultValue:0},
-    token:{type:Sequelize.CHAR(255)},
+    rank:{type: Sequelize.CHAR(30),defaultValue:"老师"},
     own_lab:{type:Sequelize.CHAR(10)},
     introduce:{type:Sequelize.CHAR(255),defaultValue:'这个人很懒，他什么也没有说'}
 },
