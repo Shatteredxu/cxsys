@@ -12,6 +12,11 @@ var crypto = require('../config/cryptoConfig')
 var common = require('../common/common')
 var project_apply = require('../modles/projectApply')
 var sequelize = require('sequelize')
+var notice = require('../modles/notice')
+var projectApply = require('../modles/projectApply')
+var lab = require('../modles/lab')
+var projectUser = require('../modles/projectUser')
+var project = require('../modles/project')
 /**
  * 需要登陆的请求
  * 1.github第三方登录
@@ -67,6 +72,7 @@ module.exports = {
      * 获取用户信息
      */
     async getUserInfo(ctx) {
+        user.belongsTo(lab, { foreignKey: 'own_lab' })
         if (ctx.request.body == {}) {
             console.log("sdsdw", ctx.request.body)
             var id = ctx.request.body.id
@@ -78,7 +84,8 @@ module.exports = {
         }
         await user.findOne({
             where: { 'id': id },
-            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid', 'introduce']
+            'attributes': ['id', 'name', 'headImg', 'power', 'email', 'pid', 'sex', 'phone', 'sid', 'introduce','own_lab'],
+            include: { model: lab }
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(Error => {
@@ -157,7 +164,6 @@ module.exports = {
      */
     async mailSure(ctx) {
         let identifyCode = ctx.request.body.identifyCode
-        console.log(ctx.session.identifyCode)
         if (identifyCode == ctx.session.identifyCode) {
             ctx.body = result(1, '验证成功')
         } else if (identifyCode !== ctx.session.identifyCode) {
@@ -201,6 +207,7 @@ module.exports = {
      */
     async getBackPass(ctx) {
         let tomail = ctx.request.body.email
+        console.log("sds",tomail)
         let identifyCode = common.getIdentifyCode()
         let title = '找回密码'
         let content = `<h3>您的验证码为${identifyCode}</h3>`
@@ -208,6 +215,7 @@ module.exports = {
         ctx.session.identifyCode = identifyCode
         if (message) {
             ctx.body = result(1, '发送成功')
+            console.log(message)
         } else {
             ctx.body = result(0, '服务器错误')
         }
@@ -344,5 +352,87 @@ module.exports = {
             }
         }
     },
-
+    /**
+     * 获取基本公告
+     */
+    async getBaseMessgae(ctx){
+        //1.获取基本公告
+        var s =ctx.request.body
+        var uid = ctx.session.id
+        var labId=0
+        var chargeLab=0
+        // 获取他所在的实验室
+        await user.findOne({
+            where:{id:uid}
+        }).then(res=>{
+            labId=res.own_lab
+        })
+        await notice.findAll({
+            where:{
+                $or:[
+                    {sendType:2,senduser:uid},
+                    {sendType:1,senduser:labId},
+                    {sendType:0}
+                ]
+            }
+        }).then(res=>{
+            ctx.body = result(1,res)
+        })
+        //2.获取申请消息()
+        await user.findOne({
+            where:{id:uid,}
+        }).then(res=>{
+            labId=res.own_lab
+        })
+        
+    },
+    /**
+     * 获取申请消息
+     */
+    async getMessgae(ctx){
+        //1.获取基本公告
+        var s =ctx.request.body
+        var uid = ctx.session.id
+        var chargeLab=0
+        // 获取他所在的实验室
+        await user.findOne({
+            where:{id:uid,power:3}
+        }).then(res=>{
+            chargeLab=res.own_lab
+        })
+        await projectApply.findAll({
+            where:{applyType:0,applyLab:chargeLab}
+        }).then(res=>{
+            ctx.body = result(1,res)
+        })
+    },
+    /**
+     * 获取参与的项目
+     */
+    async getOwnPro(ctx){
+      var uid = ctx.session.id
+      projectUser.belongsTo(project, { foreignKey: 'pid' })
+      await projectUser.findAll({
+          where:{uid:uid},
+          include: [{ model: project}]
+      }).then(res=>{
+          ctx.body= result(1,res)
+      })
+    },
+    /**
+     * 根据id获取实验室的基本信息
+     * @param {*} ctx 
+     */
+    async getLabInfoById(ctx){
+        let id = ctx.request.body.labId
+        lab.belongsTo(user,{foreignKey:'chargeUser'})
+        await lab.findOne({
+            where:{id:id},
+            include: [{ model: user}]
+        }).then(res=>{
+            ctx.body=result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    }
 }

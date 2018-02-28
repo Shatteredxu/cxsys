@@ -46,12 +46,14 @@ module.exports = {
     let establishTime = s.establishTime
     let isOpen = s.isOpen
     let introduction = s.introduction
+    let institute = s.institute
     await lab.update({
       name:name,
       position:position,
       establishTime:establishTime,
       isOpen:isOpen,
-      introduction:introduction
+      introduction:introduction,
+      institute:institute
     }).then(res=>{
       ctx.body = result(1,res)
     }).catch(err=>{

@@ -10,6 +10,7 @@ var crypto = require('../config/cryptoConfig')
 var token1 = require('../config/jsonWebToken')
 var common = require('../common/common')
 var lab_glory = require("../modles/lab_glory")
+var notice = require('../modles/notice')
 /**
  * 获取项目列表（分页）
  * 分页获取实验室
@@ -141,7 +142,7 @@ module.exports = {
         let param = ctx.request.body.param
         await user.findOne(
             {
-                attributes: ['id', 'sid', 'name', 'headImg', 'email', 'pid', 'power'],
+                attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power'],
                 where: { $or: [{ name: param }, { email: param }] }
             },
         ).then(res => {
@@ -255,7 +256,4 @@ module.exports = {
             ctx.body = result(-1,'参数错误')
         }
     },
-    /**
-     * 根据id查询用户
-     */
 }

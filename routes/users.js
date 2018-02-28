@@ -32,4 +32,12 @@ router.post('/queryGlory',index.queryGlory)
 router.post('/applyProject',user.applyProject)
 //申请项目接口
 router.post('/applyProPlan',user.applyProPlan)
+//获取消息
+router.post('/getMessgae',user.getMessgae)
+//获取基本消息
+router.post('/getBaseMessgae',user.getBaseMessgae)
+//获取用户参与的项目
+router.post('/getOwnPro',user.getOwnPro)
+//获取实验室的信息
+router.post('/getLabInfoById',user.getLabInfoById)
 module.exports = router

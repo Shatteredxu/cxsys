@@ -17,12 +17,12 @@ module.exports = {
             secure: true,
             port: 465,
             auth: {
-                user: '396256980@qq.com',
-                pass: 'gkyitydqmsfxcabb'
+                user: '2211318646@qq.com',
+                pass: 'wpgedfmnqshidhig'
             }
         })
         var mailoptions = {
-            from: '396256980@qq.com',
+            from: '2211318646@qq.com',
             to: toEmail,
             subject: title,
             html: content

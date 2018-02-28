@@ -40,4 +40,5 @@ router.post('/queryNotice',index.queryNotice)
 router.post('/queryNotice',index.queryNotice)
 //获取实验室信息
 router.post('/getLabById',index.getLabById)
+
 module.exports = router
