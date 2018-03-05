@@ -11,6 +11,7 @@ var token1 = require('../config/jsonWebToken')
 var common = require('../common/common')
 var lab_glory = require("../modles/lab_glory")
 var notice = require('../modles/notice')
+var goods = require('../modles/goods')
 /**
  * 获取项目列表（分页）
  * 分页获取实验室
@@ -40,7 +41,7 @@ module.exports = {
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(Error => {
-            ctx.body = result(0, '服务器错误')
+            ctx.body = result(0, Error)
         })
     },
     /**
@@ -161,7 +162,7 @@ module.exports = {
             'limit': pageCount,
             'offset': pageCount * (currentPage - 1),
             where: { power: 2 },
-            attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce','rank'],
+            attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce', 'rank'],
             include: { model: lab }
         }).then(res => {
             ctx.body = result(1, res)
@@ -170,28 +171,28 @@ module.exports = {
         })
     },
     //查询公告
-    async queryNotice(ctx){
+    async queryNotice(ctx) {
         let len = ctx.request.body.len
-        if(len){
+        if (len) {
             await notice.findAll({
                 'order': [
                     ['id', 'DESC'],
                 ],
                 limit: len
-            }).then(res=>{
-                ctx.body = result(1,res)
-            }).catch(err=>{
-                ctx.body = result(0,err)
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
             })
-        }else{
+        } else {
             await notice.findAll({
                 'order': [
                     ['id', 'DESC'],
                 ],
-            }).then(res=>{
-                ctx.body = result(1,res)
-            }).catch(err=>{
-                ctx.body = result(0,err)
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
             })
         }
     },
@@ -199,7 +200,7 @@ module.exports = {
      * 根据实验室获取老师
      * @param {*} ctx 
      */
-    async getTeacherBylabId(ctx){
+    async getTeacherBylabId(ctx) {
         let s = ctx.request.body
         let pageCount = parseInt(s.pageCount)
         let currentPage = parseInt(s.currentPage)
@@ -208,52 +209,76 @@ module.exports = {
         await user.findAndCountAll({
             'limit': pageCount,
             'offset': pageCount * (currentPage - 1),
-            where: { power: 2,own_lab:labId },
+            where: { power: 2, own_lab: labId },
             attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power', 'own_lab', 'introduce']
-        }).then(res=>{
-            ctx.body = result(1,res)
-        }).catch(error=>{
-            ctx.body = result(0,error)
+        }).then(res => {
+            ctx.body = result(1, res)
+        }).catch(error => {
+            ctx.body = result(0, error)
         })
     },
     //获取实验室荣誉
-    async queryGlory(ctx){
+    async queryGlory(ctx) {
         let s = ctx.request.body
         let labId = s.labId
         lab_glory.belongsTo(lab, { foreignKey: 'ownLab' })
-        if(labId){
+        if (labId) {
             await lab_glory.findAndCountAll({
-                attributes: ["id","winTime","ownPro"],
-                where:{ownLab:labId},
+                attributes: ["id", "winTime", "ownPro"],
+                where: { ownLab: labId },
                 include: { model: lab }
-            }).then(res=>{
-                ctx.body = result(1,res)
+            }).then(res => {
+                ctx.body = result(1, res)
             })
-        }else{
+        } else {
             await lab_glory.findAndCountAll({
-                attributes: ["id","winTime","ownPro"],
+                attributes: ["id", "winTime", "ownPro"],
                 include: { model: lab }
-            }).then(res=>{
-                ctx.body = result(1,res)
-            }).catch(err=>{
-                ctx.body = result(0,err)
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(err => {
+                ctx.body = result(0, err)
             })
         }
     },
     //获取实验室信息
-    async getLabById(ctx){
+    async getLabById(ctx) {
         let labId = ctx.request.body.labId
-        if(labId){
-            var count= await user.count({
-                where: { power: 2,own_lab:labId },
+        if (labId) {
+            var count = await user.count({
+                where: { power: 2, own_lab: labId },
             })
             await lab.findOne({
-                where:{id:labId}
-            }).then((res)=>{
-                ctx.body=result(count,res)
+                where: { id: labId }
+            }).then((res) => {
+                ctx.body = result(count, res)
             })
-        }else{
-            ctx.body = result(-1,'参数错误')
+        } else {
+            ctx.body = result(-1, '参数错误')
         }
     },
+    async getGoodsById(ctx) {
+        goods.belongsTo(lab, { foreignKey: 'belongTo' })
+        let id = ctx.request.body.id
+        await goods.findOne({
+            where: { id: id },
+            include: { model: lab }
+        }).then(res => {
+            ctx.body = result(1, res)
+        }).catch(err => {
+            ctx.body = result(0, err)
+        })
+    },
+    async getAllResult(ctx) {
+        let type = ctx.request.body.type
+        let labId = ctx.request.body.labId
+        await lab_glory.findAndCount({
+            where: { type: type, }
+        }).then(res => {
+            ctx.body = result(1, res)
+        }).catch(err => {
+            ctx.body = result(0, err)
+        })
+
+    }
 }

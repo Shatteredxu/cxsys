@@ -22,18 +22,25 @@ module.exports = {
     let lid = s.id
     let pageCount = parseInt(s.pageCount)
     let currentPage = parseInt(s.currentPage)
-    console.log(pageCount,currentPage)
+    goods.belongsTo(lab,{foreignKey:'belongTo'})
     if (lid) {
       await goods.findAndCountAll({
         'limit': pageCount,
         'offset': pageCount * (currentPage - 1)
-      },{where:{id:lid}}).then(res =>{
+      },{where:{id:lid},include:{ model: lab}}).then(res =>{
         ctx.body = result(1,res)
       }).catch(Error=>{
         ctx.body = result(0,"服务器错误")
       })
     } else {
-      ctx.body = result(-3, '参数错误')
+      await goods.findAndCountAll({
+        'limit': pageCount,
+        'offset': pageCount * (currentPage - 1)
+     ,include:{ model: lab} }).then(res =>{
+        ctx.body = result(1,res)
+      }).catch(Error=>{
+        ctx.body = result(0,"服务器错误")
+      })
     }
   },
   /**

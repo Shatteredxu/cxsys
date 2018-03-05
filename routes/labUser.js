@@ -6,7 +6,7 @@ var lab = require('../controller/lab')
 /**
  * 实验室学生的接口
  */
-router.prefix('/labUser')
+router.prefix('/lab')
 // 获取实验室物品
 router.post('/getLabGoods',lab.getLabGoods)
 //实验室人员进出记录
