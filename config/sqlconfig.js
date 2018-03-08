@@ -1,5 +1,5 @@
 'use strict';
-var Sequelize=require('Sequelize')
+var Sequelize=require('sequelize')
 /**
  * 建立一个sequelize连接池，链接mysql数据库
  * @param host ：端口

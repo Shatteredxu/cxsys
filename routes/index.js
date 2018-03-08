@@ -44,4 +44,6 @@ router.post('/getLabById',index.getLabById)
 router.post('/getGoodsById',index.getGoodsById)
 //查寻成果
 router.post('/getResult',index.getAllResult)
+//获取实验室的项目
+router.post('/getProByLabId',index.getProByLabId)
 module.exports = router

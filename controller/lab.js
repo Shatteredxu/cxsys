@@ -63,5 +63,25 @@ module.exports = {
     }).catch(err=>{
       ctx.body = result(0,err)
     })
+  },
+  /**
+   * 删除物品
+   */
+  async DeleteGoods(ctx){
+    let id =ctx.request.body.id
+    await goods.destroy({
+      where:{id:id}
+    }).then(re=>{
+      ctx.body =result(1,re)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  /**
+   * 修改实验室物品
+   * @param {*} ctx 
+   */
+  async AlterGoods(ctx){
+    
   }
 }

@@ -11,4 +11,8 @@ router.prefix('/lab')
 router.post('/getLabGoods',lab.getLabGoods)
 //实验室人员进出记录
 router.post('/StaffRecord',lab.StaffRecord)
+//删除实验室物品
+router.post('/DeleteGoods',lab.DeleteGoods)
+// 修改实验室物品
+router.post('/AlterGoods',lab.AlterGoods)
 module.exports = router

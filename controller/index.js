@@ -279,6 +279,8 @@ module.exports = {
         }).catch(err => {
             ctx.body = result(0, err)
         })
+    },
+    async getProByLabId(){
 
     }
-}
+} 

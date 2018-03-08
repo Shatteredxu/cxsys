@@ -36,6 +36,7 @@ module.exports.initialize = function (app) {
         }).then(res => {
             if (res.power !== 0) {
                 return next()
+
             } else {
                 ctx.body = result(-5, '权限不足')
             }
@@ -46,14 +47,17 @@ module.exports.initialize = function (app) {
     //实验室老师权限
     app.use(async (ctx, next) => {
         let uid = ctx.session.id
+        console.log(uid)
         await user.findOne({
             where: { id: uid }
         }).then(res => {
+            console.log(res.power)
             if (res.power !== 1) {
+             
                 return next()
-                console.log("sdskkkkk")
             } else {
                 ctx.body = result(-5, '权限不足')
+                console.log(res.power !== 1)
             }
         })
     });
