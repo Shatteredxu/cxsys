@@ -128,7 +128,7 @@ module.exports = {
         let s = ctx.request.body
         lab.belongsTo(user, { foreignKey: 'chargeUser' })
         await lab.findAll({
-            include: { model: user, attributes: ['id', 'sid', 'name', 'headImg', 'email', 'pid', 'power'] }
+            include: { model: user, attributes: ['id', 'sid', 'name', 'headImg', 'email', 'power'] }
         }).then(res => {
             ctx.body = result(1, res)
         }).catch(error => {

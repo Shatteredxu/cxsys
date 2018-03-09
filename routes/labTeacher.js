@@ -11,6 +11,8 @@ router.prefix('/labt')
 
 //上传实验室信息
 router.post('/updateLabInfo',labt.updateLabInfo)
+//上传实验室图片
+router.post('/updateLabImage',labt.updateLabImage)
 //添加学生
 router.post('/addLabStu',labt.addLabStu)
 //删除实验室学生

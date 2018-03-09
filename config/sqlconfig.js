@@ -6,8 +6,8 @@ var Sequelize=require('sequelize')
  * @param diaect: 连接的数据库类型
  * @return {sequelize}返回一个sequelize对象
  */
-var sequelize = new Sequelize('xwj','admin','admin',{
-    host:'119.29.150.141',
+var sequelize = new Sequelize('xwj','root','root',{
+    host:'localhost',
     dialect:'mysql',
     port:3306,
 })

@@ -42,17 +42,33 @@ module.exports = {
 
   //上传实验室图片
   async updateLabInfo(ctx) {
-    const filePaths = [];
-    var res;
-    let s = ctx.request.body.fields
-    const files = ctx.request.body.files || {};
-    let  labId = s.labId
+    let s = ctx.request.body
+    let labId = s.labId
     let name = s.name
     let position = s.position
     let establishTime = s.establishTime
     let isOpen = s.isOpen
     let introduction = s.introduction
     let institute = s.institute
+    await lab.update({
+      name: name,
+      position: position,
+      establishTime: establishTime,
+      isOpen: isOpen,
+      introduction: introduction,
+      institute: institute
+    },{where:{id:labId}}).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  async updateLabImage(ctx){
+    const filePaths = [];
+    var res;
+    let s = ctx.request.body.fields
+    const files = ctx.request.body.files || {};
+    let  labId = s.labId
     for (let key in files) {
       const file = files[key];
       let fileName = file.name
@@ -68,14 +84,9 @@ module.exports = {
         let UUidName = arraypath[arraypath.length - 1]
         let databasePath = `/${UUidName}`
         if (labId) {
+          console.log("sdsds",labId)
           await lab.update({
             photo: databasePath,
-            name: name,
-            position: position,
-            establishTime: establishTime,
-            isOpen: isOpen,
-            introduction: introduction,
-            institute: institute
           },
             {
               where: { id: labId }
@@ -84,6 +95,8 @@ module.exports = {
             }).catch(Error => {
               ctx.body = result(0, Error)
             })
+        }else{
+          ctx.body = result(-5,'参数不正确')
         }
       } else {
         ctx.body = result(-2, '格式不正确')
@@ -94,16 +107,14 @@ module.exports = {
     let s = ctx.request.body
     let name = s.name
     let sid = s.sid
-    let uid = ctx.session.id
     let labId = ctx.request.body.labId
     var exist = 0
     await user.findOne({
       where: { sid: sid }
     }).then(res => {
-      console.log(res.name)
       res.name == name ? exist = 1 : exist = 0
     }).catch(err => {
-      ctx.body = result(0, '服务器错误')
+      ctx.body = result(0, err)
     })
     if (exist == 1) {
       await user.update({
@@ -113,7 +124,7 @@ module.exports = {
         }).then(res => {
           ctx.body = result(1, '添加成功')
         }).catch(err => {
-          ctx.body = result(0, '服务器错误')
+          ctx.body = result(0, err)
         })
     } else {
       ctx.body = result(-2, '该用户不存在')
