@@ -45,8 +45,56 @@ module.exports = {
       })
      }else{
        ctx.body = result(-2,'用户不存在')
-     }
+     }s
+    },
+    async getRoot(ctx){
+      await user.findAll({
+        'attributes': ['id', 'name', 'headImg', 'power', 'email', 'sex', 'phone', 'sid', 'introduce'],
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+    },
+    async addLab(ctx){
+      let s = ctx.request.body
+      let name = s.name
+      let position = s.position
+      let isopen = s.isopen
+      let tname = s.tname
+      let tid = s.tid
+      let exist = 0
+      await user.findOne({
+        where:{sid:tid}
+      }).then(res=>{
+        res?exist=res.id:exist=0
+        console.log(res.id)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+      if(exist){
+        await lab.create({
+          name:name,
+          position:position,
+          isopen:isopen,
+          chargeUser:exist,
+        }).then(res=>{
+          ctx.body = result(1,res)
+        }).catch(err=>{
+          ctx.body = result(0,err)
+        })
+      }else{
+        ctx.body = result(-2,'用户不存在')
+      }
+    },
+    async deleteLab(ctx){
+      let id = ctx.request.body.id
+      await lab.destroy({
+        where:{id:id}
+      }).then(err=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
     }
-    
- 
 }

@@ -40,4 +40,6 @@ router.post('/getBaseMessgae',user.getBaseMessgae)
 router.post('/getOwnPro',user.getOwnPro)
 //获取实验室的信息
 router.post('/getLabInfoById',user.getLabInfoById)
+//添加项目成员
+router.post('/addProMember',user.addProMember)
 module.exports = router

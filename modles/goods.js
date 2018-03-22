@@ -8,6 +8,7 @@ var goods = sequelize.define('goods', {
     id: {
         type: Sequelize.INTEGER(10),
         primaryKey: true,
+        autoIncrement:true
     },
     name: { type: Sequelize.CHAR(25) },
     photo:{type:Sequelize.CHAR(50)},
@@ -15,7 +16,7 @@ var goods = sequelize.define('goods', {
     models:{type:Sequelize.CHAR(20)},
     buyTime: { type: Sequelize.DATE(), defaultValue: Sequelize.NOW() },
     belongTo: {type: Sequelize.INTEGER(10)},
-    stateId: { type: Sequelize.INTEGER(10) },
+    stateId: { type: Sequelize.INTEGER(1) },
     validTime: { type: Sequelize.DATE() },
     detailInfo:{type:Sequelize.CHAR(255)}
 }, {

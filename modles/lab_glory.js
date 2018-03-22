@@ -7,7 +7,8 @@ var lab_glory = sequelize.define('lab_glory', {
     id: {
         type: Sequelize.INTEGER(10),
         primaryKey: true,
-        allowNull: false
+        allowNull: true,
+        autoIncrement:true
     },
     name:{ type: Sequelize.CHAR(20)},
     winUser:{ type: Sequelize.CHAR(20)},
@@ -15,9 +16,10 @@ var lab_glory = sequelize.define('lab_glory', {
     guideTea:{ type: Sequelize.CHAR(30)},
     level:{ type: Sequelize.INTEGER(1)},
     type:{type: Sequelize.INTEGER(1)},
-    winTime: { type: Sequelize.DATE(20),defaultValue: Sequelize.NOW()},
+    winTime: { type: Sequelize.DATE(20),defaultValue:Sequelize.NOW()},
     ownLab: { type: Sequelize.INTEGER(10) },
     author:{type:Sequelize.CHAR(10)},
+    magazine:{type:Sequelize.CHAR(50)}
 }, {
         tableName: 'lab_glory',
         timestamps: false

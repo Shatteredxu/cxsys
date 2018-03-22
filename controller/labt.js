@@ -12,6 +12,8 @@ var path = require('path')
 const uuidV1 = require('uuid/v1')
 var fs = require('fs')
 var lab_glory = require("../modles/lab_glory")
+var notice = require('../modles/notice')
+var record = require('../modles/record')
 /**
  * 1.获取实验室物品
  * 
@@ -164,11 +166,12 @@ module.exports = {
   let s = ctx.request.body
   let pageCount = parseInt(s.pageCount)
   let currentPage = parseInt(s.currentPage)
-  let id = s.labId
-  await lab.findAndCountAll({
+  let labId = s.labId
+  await project.findAndCountAll({
     'limit': pageCount,
      'offset': pageCount * (currentPage - 1),
-  },{where:{id:id}}).then(res=>{
+     where:{labId:labId}
+  }).then(res=>{
     ctx.body = result(1,res)
   }).catch(err=>{
     ctx.body = result(0,err)
@@ -192,11 +195,13 @@ module.exports = {
     let name = s.name
     let level = s.level 
     let winUser =s.winUser
+    let result1 = s.result
     let author = s.author
     let guideTea = s.guideTea
     let gloryInfo = s.gloryInfo
     let labId = s.labId
     let winTime = s.winTime
+    let magazine = s.magazine
     if(type==0){
       await lab_glory.create({
         name:name,
@@ -204,7 +209,9 @@ module.exports = {
         winUser:winUser,
         guideTea:guideTea,
         ownLab:labId,
-        winTime:winTime
+        winTime:winTime,
+        result:result1,
+        type:0
       }).then(res=>{
         ctx.body = result(1,res)
       }).catch(err=>{
@@ -215,11 +222,186 @@ module.exports = {
         name:name,
         author:author,
         ownLab:labId,
-        winTime:winTime
+        winTime:winTime,
+        magazine:magazine,
+        type:1
       }).then(res=>{
         ctx.body = result(1,res)
       }).catch(err=>{
-        ct.body = result(0,err)
+        ctx.body = result(0,err)
+      })
+    }
+  },
+  //查询实验室项目成果
+  async getLabGlory(ctx){
+    let s = ctx.request.body 
+    let type = s.type
+    let labId =s.labId
+    if(type==0){
+      await lab_glory.findAndCountAll({
+        where:{type:0,ownLab:labId},
+        attributes: ['id','name', 'level','result', 'winUser', 'ownLab','winTime','guideTea'],
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+    }else{
+      await lab_glory.findAndCountAll({
+        where:{type:1,ownLab:labId},
+        attributes: ['id',  'name', 'author',  'ownLab','winTime','magazine'],
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+    }
+  },
+  async deleteGlory(ctx){
+    let id = ctx.request.body.id
+    await lab_glory.destroy({
+      where:{id:id}
+    }).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  //发送公告
+  async sendNotice(ctx){
+    let s = ctx.request.body 
+    let sendType = s.sendType
+    let sendUser = s.sendUser
+    let uid = ctx.session.id
+    let title = s.title
+    let content = s.content
+    await notice.create({
+      sendType:sendType,
+      sendUser:sendUser,
+      issueId:uid,
+      title:title,
+      content:content
+    }).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  async addNewPro(ctx){
+    var s = ctx.request.body 
+    var pname = s.pname
+    var sid = s.userId
+    var teacherId = s.teacherId
+    var expectTime = s.expectTime
+    var labId = s.labId
+    var uid=0
+    var tid=0
+    var list=sid.split(',')
+    var len = list.length
+    await user.findOne({
+      where:{sid:teacherId,power:3}
+    }).then(res=>{
+      res?tid = res.id:ctx.body = result(-2,'教工号不存在')
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+    for(var i=0;i<len;i++){
+    await user.findOne({
+      where:{sid:list[i]}
+    }).then(res=>{
+      res?uid = res.id:''
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+    if(uid&tid){
+      await project.create({
+        expectTime:expectTime,
+        name:pname,
+        chargeTeacher:tid,
+        chargeUser:uid,
+        labId:labId
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+    }else{
+      ctx.body = result(-2,'用户不存在')
+    }
+    }
+  },
+  async getLabTeacher(ctx){
+    let labId = ctx.request.body.labId
+    await user.findAll({
+      where:{own_lab:labId,power:{'$gte':3}},
+      attributes: ['id',  'sid', 'name','headImg', 'email', 'rank','power','phone'],
+    }).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  /**
+   * 添加实验室老师
+   * @param {*} ctx 
+   */
+  async addLabTeacher(ctx){
+      let s = ctx.request.body
+      let sid = s.sid
+      let name = s.name
+  },
+  async getRecord(ctx){
+    let labId = ctx.request.body.labId
+    record.belongsTo(user,{foreignKey:'uid'})
+    await record.findAll({
+      where:{labId:labId},
+      include: { model: user,attributes:["id","sid","name"]}
+    }).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  async updateLabGlory(ctx){
+    let s = ctx.request.body
+    let type = s.type
+    let name = s.name
+    let level = s.level 
+    let winUser =s.winUser
+    let result1 = s.result
+    let author = s.author
+    let guideTea = s.guideTea
+    let gloryInfo = s.gloryInfo
+    let labId = s.labId
+    let winTime = s.winTime
+    let magazine = s.magazine
+    if(type==0){
+      await lab_glory.update({
+        name:name,
+        level:level,
+        winUser:winUser,
+        guideTea:guideTea,
+        ownLab:labId,
+        winTime:winTime,
+        result:result1,
+        type:0
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
+      })
+    }else{
+      await lab_glory.update({
+        name:name,
+        author:author,
+        ownLab:labId,
+        winTime:winTime,
+        magazine:magazine,
+        type:1
+      }).then(res=>{
+        ctx.body = result(1,res)
+      }).catch(err=>{
+        ctx.body = result(0,err)
       })
     }
   }

@@ -12,5 +12,11 @@ router.prefix('/root')
 router.post('/getLabGoods',lab.getLabGoods)
 //修改实验室老师
 router.post('/editLabTea',root.editLabTea)
+//获取用户
+router.post('/getRoot',root.getRoot)
+//添加实验室
+router.post('/addLab',root.addLab)
+//删除实验室
+router.post("/deleteLab",root.deleteLab)
 
 module.exports = router

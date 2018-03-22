@@ -17,6 +17,7 @@ var projectApply = require('../modles/projectApply')
 var lab = require('../modles/lab')
 var projectUser = require('../modles/projectUser')
 var project = require('../modles/project')
+var projectUser = require('../modles/projectUser')
 /**
  * 需要登陆的请求
  * 1.github第三方登录
@@ -303,15 +304,24 @@ module.exports = {
         let pname = s.pname
         let applyLab = s.applyLab
         let devDemand = s.devDemand
-        await project_apply.create({
-            pname: pname,
-            applyLab: applyLab,
-            devDemand: devDemand
-        }).then(res => {
-            ctx.body = result(1, res)
-        }).catch(Error => {
-            ctx.body = result(0, Error)
-        })
+        let guideName = s.guideName
+        let contactWay=s.contactWay
+        let exertTime = s.exertTime
+        let uid =ctx.session.id
+            await project_apply.create({
+                pname: pname,
+                uid:uid,
+                applyLab: applyLab,
+                guideName:guideName,
+                contactWay:contactWay,
+                devDemand: devDemand,
+                expertTime:exertTime,
+                applyType:0
+            }).then(res => {
+                ctx.body = result(1, res)
+            }).catch(Error => {
+                ctx.body = result(0, Error)
+            })
     },
     /**
      * 上传项目计划方案
@@ -322,7 +332,6 @@ module.exports = {
         var res;
         const files = ctx.request.body.files || {};
         const pid = ctx.request.body.fields.pid
-        console.log(labId)
         for (let key in files) {
             const file = files[key];
             let fileName = file.name
@@ -353,6 +362,23 @@ module.exports = {
         }
     },
     /**
+     * 
+     * @param {*} ctx 
+     */
+    async addProMember(ctx){
+        let s =ctx.request.body
+        let sid =s.sid
+        let pid = s.pid
+        await projectUser.create({
+            uid:sid,
+            pid:pid
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    },
+    /**
      * 获取基本公告
      */
     async getBaseMessgae(ctx){
@@ -362,6 +388,7 @@ module.exports = {
         var labId=0
         var chargeLab=0
         // 获取他所在的实验室
+        notice.belongsTo(user, { foreignKey: 'issueId' })
         await user.findOne({
             where:{id:uid}
         }).then(res=>{
@@ -374,15 +401,10 @@ module.exports = {
                     {sendType:1,senduser:labId},
                     {sendType:0}
                 ]
-            }
+            },
+            include: { model: user ,attributes:["id","name"]}
         }).then(res=>{
             ctx.body = result(1,res)
-        })
-        //2.获取申请消息()
-        await user.findOne({
-            where:{id:uid,}
-        }).then(res=>{
-            labId=res.own_lab
         })
         
     },
@@ -394,6 +416,7 @@ module.exports = {
         var s =ctx.request.body
         var uid = ctx.session.id
         var chargeLab=0
+        projectApply.belongsTo(user, { foreignKey: 'uid' })
         // 获取他所在的实验室
         await user.findOne({
             where:{id:uid,power:3}
@@ -401,9 +424,12 @@ module.exports = {
             chargeLab=res.own_lab
         })
         await projectApply.findAll({
-            where:{applyType:0,applyLab:chargeLab}
+            where:{applyType:0,applyLab:chargeLab},
+            include: { model: user ,attributes:["id","name"]}
         }).then(res=>{
             ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
         })
     },
     /**

@@ -10,7 +10,7 @@ var project = sequelize.define('project', {
     chargeUser: { type: Sequelize.INTEGER(10) },
     chargeTeacher:{type:Sequelize.INTEGER(10)},
     startTime: { type: Sequelize.DATE(10), defaultValue: Sequelize.NOW() },
-    applyTime: { type: Sequelize.DATE(10) },
+    applyTime: { type: Sequelize.DATE(10) , defaultValue: Sequelize.NOW()},
     expectTime: { type: Sequelize.DATE(10) },
     actualTime: { type: Sequelize.DATE(10) },
     labId: { type: Sequelize.INTEGER(10) },

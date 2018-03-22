@@ -14,7 +14,7 @@ var lab = sequelize.define('lab', {
     chargeUser:{type:Sequelize.INTEGER(10)},
     name: { type: Sequelize.CHAR(20) },
     position: { type: Sequelize.CHAR(30) },
-    establishTime: { type: Sequelize.DATE() },
+    establishTime: { type: Sequelize.DATE() ,defaultValue:Sequelize.NOW()},
     isOpen: { type: Sequelize.INTEGER(1) ,defaultValue:0},
     introduction: { type: Sequelize.CHAR(255) },
     photo: { type: Sequelize.TEXT() },

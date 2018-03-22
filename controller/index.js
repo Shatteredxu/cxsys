@@ -173,13 +173,28 @@ module.exports = {
     //查询公告
     async queryNotice(ctx) {
         let len = ctx.request.body.len
+        let uid = ctx.session.id
+        let labId = 0
+        let sid =0
+        notice.belongsTo(user, { foreignKey: 'issueId' })
+        await user.findOne({where:{
+            id:uid
+        }}).then(res=>{
+            labId = res.own_lab
+            sid=res.sid
+        }).catch(err=>{
+            ctx.body = result(0,'服务器错误')
+        })
         if (len) {
             await notice.findAll({
                 'order': [
                     ['id', 'DESC'],
-                ],
-                limit: len
-            }).then(res => {
+                ], 
+                where:{$or:[
+                    {sendType:0},{sendType:1,sendUser:labId},{sendType:2,sendUser:sid}
+                ]},
+                include: { model: user,attributes: ['id', 'sid', 'name',  'rank'] }
+            },{limit: len}).then(res => {
                 ctx.body = result(1, res)
             }).catch(err => {
                 ctx.body = result(0, err)
@@ -189,7 +204,11 @@ module.exports = {
                 'order': [
                     ['id', 'DESC'],
                 ],
-            }).then(res => {
+                where:{$or:[
+                    {sendType:0},{sendType:1,sendUser:labId},{sendType:2,sendUser:sid}
+                ]},
+                include: { model: user,attributes: ['id', 'sid', 'name',  'rank'] }
+            },).then(res => {
                 ctx.body = result(1, res)
             }).catch(err => {
                 ctx.body = result(0, err)
@@ -219,26 +238,29 @@ module.exports = {
     },
     //获取实验室荣誉
     async queryGlory(ctx) {
-        let s = ctx.request.body
-        let labId = s.labId
+        let s = ctx.request.body 
+        let type = s.type
         lab_glory.belongsTo(lab, { foreignKey: 'ownLab' })
-        if (labId) {
-            await lab_glory.findAndCountAll({
-                attributes: ["id", "winTime", "ownPro"],
-                where: { ownLab: labId },
-                include: { model: lab }
-            }).then(res => {
-                ctx.body = result(1, res)
-            })
-        } else {
-            await lab_glory.findAndCountAll({
-                attributes: ["id", "winTime", "ownPro"],
-                include: { model: lab }
-            }).then(res => {
-                ctx.body = result(1, res)
-            }).catch(err => {
-                ctx.body = result(0, err)
-            })
+        if(type==0){
+        await lab_glory.findAndCountAll({
+            where:{type:0},
+            attributes: ['id',  'name', 'level','result', 'winUser', 'ownLab','winTime','guideTea','ownLab'],
+            include: { model: lab}
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+        }else{
+        await lab_glory.findAndCountAll({
+            where:{type:1},
+            attributes: ['id',  'name', 'author',  'ownLab','winTime','magazine','ownLab'],
+            include: { model: lab}
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
         }
     },
     //获取实验室信息

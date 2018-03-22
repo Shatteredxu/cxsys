@@ -25,6 +25,20 @@ router.post('/getLabPro',labt.getLabPro)
 router.post('/editLabInfo',labt.editLabInfo)
 //删除项目
 router.post('/deletePro',labt.deletePro)
+//查询实验成果
+router.post('/getLabGlory',labt.getLabGlory)
+//查询实验成果
+router.post('/deleteGlory',labt.deleteGlory)
 //实验室成果添加
 router.post('/addLabGlory',labt.addLabGlory)
+//发送公告
+router.post('/sendNotice',labt.sendNotice)
+//老师添加新项目
+router.post('/addNewPro',labt.addNewPro)
+//获取指定实验室老师
+router.post("/getLabTeacher",labt.getLabTeacher)
+//shi验室人员出勤情况
+router.post("/getRecord",labt.getRecord)
+//修改实验室成果
+router.post("/updateLabGlory",labt.updateLabGlory)
 module.exports = router
