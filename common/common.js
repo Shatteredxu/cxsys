@@ -9,7 +9,6 @@ var user = require('../modles/user')
 module.exports = {
 	async saveToken(id) {
 		var token = await token1.getToken(id)//生成token
-		console.log(token)
 		await user.update({
 			token: token
 		}, {

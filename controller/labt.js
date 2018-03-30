@@ -167,10 +167,14 @@ module.exports = {
   let pageCount = parseInt(s.pageCount)
   let currentPage = parseInt(s.currentPage)
   let labId = s.labId
+  project.belongsTo(user,{foreignKey:'chargeUser'})
+  project.belongsTo(lab,{foreignKey:'labId'})
   await project.findAndCountAll({
     'limit': pageCount,
      'offset': pageCount * (currentPage - 1),
-     where:{labId:labId}
+     where:{labId:labId},
+     include:[{model:user,attributes:['id', 'sid', 'name']},
+     {model:lab,attributes:['id', 'name', 'position']}]
   }).then(res=>{
     ctx.body = result(1,res)
   }).catch(err=>{

@@ -15,6 +15,7 @@ var fs = require('fs')
 const uuidV1 = require('uuid/v1')
 var ejsExcel = require('ejsexcel');
 var  xlsx =require('node-xlsx') ;
+var pro_rate = require('../modles/pro_rate')
 /**
  * 1.获取实验室物品
  * 
@@ -32,8 +33,10 @@ module.exports = {
     if (lid) {
       await goods.findAndCountAll({
         'limit': pageCount,
-        'offset': pageCount * (currentPage - 1)
-      },{where:{id:lid},include:{ model: lab}}).then(res =>{
+        'offset': pageCount * (currentPage - 1),
+        where:{belongTo:lid},
+        include:{ model: lab}
+      }).then(res =>{
         ctx.body = result(1,res)
       }).catch(Error=>{
         ctx.body = result(0,"服务器错误")
@@ -241,11 +244,26 @@ module.exports = {
     ctx.body = data1
     data1.forEach((ele,i) => {
       let record = ele.record==0?'进':'出'
-      data1[i]=[i+1,ele.user.name,record,ele.time,content]
+      data1[i]=[i+1,ele.user.name,record,ele.time,ele.content]
     });
     data1.unshift(["序号","姓名","进出","时间","备注"])
     var buffer = xlsx.build([{name: "mySheetName", data: data1}]); 
     fs.writeFileSync(fileName, buffer, 'binary')
     ctx.body = result(1,fileName)
   },
+  //添加项目进度
+  async addProRate(ctx){
+    let s = ctx.request.body
+    let submitter =ctx.session.id
+    let own_pro = s.own_pro
+    await pro_rate.create({
+      submitter:submitter,
+      own_pro:own_pro
+    }).then(res=>{
+      ctx.body = result(1,res)
+    }).catch(err=>{
+      ctx.body = result(0,err)
+    })
+  },
+  
 }

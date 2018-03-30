@@ -45,7 +45,7 @@ module.exports = {
       })
      }else{
        ctx.body = result(-2,'用户不存在')
-     }s
+     }
     },
     async getRoot(ctx){
       await user.findAll({
@@ -60,7 +60,7 @@ module.exports = {
       let s = ctx.request.body
       let name = s.name
       let position = s.position
-      let isopen = s.isopen
+      let isOpen = s.isOpen
       let tname = s.tname
       let tid = s.tid
       let exist = 0
@@ -76,7 +76,7 @@ module.exports = {
         await lab.create({
           name:name,
           position:position,
-          isopen:isopen,
+          isOpen:isOpen,
           chargeUser:exist,
         }).then(res=>{
           ctx.body = result(1,res)
@@ -91,7 +91,7 @@ module.exports = {
       let id = ctx.request.body.id
       await lab.destroy({
         where:{id:id}
-      }).then(err=>{
+      }).then(res=>{
         ctx.body = result(1,res)
       }).catch(err=>{
         ctx.body = result(0,err)

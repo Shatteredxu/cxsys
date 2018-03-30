@@ -16,7 +16,7 @@ var goods = sequelize.define('goods', {
     models:{type:Sequelize.CHAR(20)},
     buyTime: { type: Sequelize.DATE(), defaultValue: Sequelize.NOW() },
     belongTo: {type: Sequelize.INTEGER(10)},
-    stateId: { type: Sequelize.INTEGER(1) },
+    stateId: { type: Sequelize.INTEGER(1),defaultValue:0},
     validTime: { type: Sequelize.DATE() },
     detailInfo:{type:Sequelize.CHAR(255)}
 }, {

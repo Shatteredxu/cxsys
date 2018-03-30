@@ -24,4 +24,6 @@ router.post('/exportGoods',lab.exportGoods)
 //删除表格
 router.post('/deleteSheet',lab.deleteSheet)
 router.post('/exportRecord',lab.exportRecord)
+//添加实验室进度
+router.post('/addProRate',lab.addProRate)
 module.exports = router

@@ -69,20 +69,19 @@ module.exports = {
         let md5pass = crypto.getMd5(password)
         await user.findOne({ where: { $or: [{ name: login }, { phone: login }, { email: login }] } })
             .then(async res => {
+                ctx.body = res
                 if (res == null) {
                     ctx.body = result(-1, '用户名不存在')
                 } else if (res.password == md5pass) {
-                    var token = await common.saveToken(res.id)
-                    ctx.body = result(1, token)
+                    ctx.body = result(1, '')
                     ctx.session.id = res.id
                 } else if (res.password !== md5pass) {
                     ctx.body = result(-2, '密码错误')
                 } else {
                     ctx.body = result(0, '服务器错误')
                 }
-                console.log(ctx.session.user)
-            }).catch(Error => {
-                ctx.body = result(0, '服务器错误')
+            }).catch(err => {
+                ctx.body = result(0, err)
             })
     },
     //注册用户
@@ -304,5 +303,26 @@ module.exports = {
     },
     async getProByLabId(){
 
+    },
+    async getTeacherById(ctx){
+        let id = ctx.request.body.id
+        await user.findOne({
+            where:{id:id},
+            attributes:[]
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
+    },
+    async getProjectById(ctx){
+        let id = ctx.request.body.id
+        await project.findOne({
+            where:{id:id}
+        }).then(res=>{
+            ctx.body = result(1,res)
+        }).catch(err=>{
+            ctx.body = result(0,err)
+        })
     }
 } 
